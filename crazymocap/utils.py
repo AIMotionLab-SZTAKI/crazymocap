@@ -4,9 +4,9 @@ import time
 # init radio as sender
 def radio_tx_init(channel=100, data_rate=Crazyradio.DR_250KPS, mode=Crazyradio.MODE_PTX):
 	radio = Crazyradio()
-	radio.set_channel(100)
-	radio.set_data_rate(Crazyradio.DR_250KPS)
-	radio.set_mode(Crazyradio.MODE_PTX)
+	radio.set_channel(channel)
+	radio.set_data_rate(data_rate)
+	radio.set_mode(mode)
 	return radio
 
 # TX test
