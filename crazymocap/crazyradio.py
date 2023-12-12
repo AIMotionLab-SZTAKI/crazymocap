@@ -36,7 +36,7 @@ USB driver for the Crazyradio USB dongle.
 __author__ = 'Bitcraze AB'
 __all__ = ['Crazyradio']
 
-
+import array
 import os
 import usb
 import logging
@@ -191,6 +191,12 @@ class Crazyradio:
         _send_vendor_setup(self.handle, SET_RADIO_ARC, arc, 0, ())
         self.arc = arc
 
+    def set_ack_enable(self, enable):
+        if enable:
+            _send_vendor_setup(self.handle, ACK_ENABLE, 1, 0, ())
+        else:
+            _send_vendor_setup(self.handle, ACK_ENABLE, 0, 0, ())
+
     def set_ard_time(self, us):
         """ Set the ACK retry delay for radio communication """
         # Auto Retransmit Delay:
@@ -256,11 +262,11 @@ class Crazyradio:
             return result
 
     ### Data transferts ###
-    def send_packet(self, dataOut):
+    def send_packet(self, dataOut: array.array):
         """ Send a packet and receive the ack from the radio dongle
-            The ack contains information about the packet transmition
+            The ack contains information about the packet transmission
             and a data payload if the ack packet contained any """
-        ackIn = None
+        ackIn = _radio_ack()
         data = None
         try:
             if (pyusb1 is False):
@@ -271,7 +277,6 @@ class Crazyradio:
                 data = self.handle.read(0x81, 64, timeout=1000)
         except usb.USBError:
             pass
-
         if data is not None:
             ackIn = _radio_ack()
             if data[0] != 0:
@@ -281,25 +286,25 @@ class Crazyradio:
                 ackIn.data = data[1:]
             else:
                 ackIn.retry = self.arc
-
         return ackIn
 
-    def sendAck(self, dataOut):
+    def sendAck(self, dataOut):  # TODO: not used now, figure out later
         """ Add an acknowledgment packet to the acknowledgment queue.
             Only valid if radio is in PRX mode. """
         if (pyusb1 is False):
             self.handle.bulkWrite(1, dataOut, 1000)
         else:
             self.handle.write(endpoint=1, data=dataOut, timeout=1000)
+            print(f"Sending response with data {dataOut}")
 
-    def receive(self, timeout=1000):
+    def receive(self, size_or_buffer=64, timeout=1000):
         """ Try to receive a packet or return None, if nothing was received within 
             the specified timeout. Only valid if radio is in PRX mode."""
         try:
             if (pyusb1 is False):
                 return self.handle.bulkRead(0x81, 64, timeout)
             else:
-                return self.handle.read(0x81, 64, timeout=timeout)
+                return self.handle.read(0x81, size_or_buffer, timeout=timeout)
         except usb.USBError:
             pass
 

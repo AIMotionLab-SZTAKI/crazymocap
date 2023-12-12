@@ -5,6 +5,7 @@ setup(name='crazymocap',
       packages=find_packages(),
       install_requires=[
         'pyusb',
-        'motioncapture'
+        'motioncapture',
+        'numpy'
         ]
       )
