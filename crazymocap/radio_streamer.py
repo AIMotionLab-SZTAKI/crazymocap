@@ -29,13 +29,17 @@ class RadioStreamer:
         atexit.register(self.close)
         self.mocap = motioncapture.MotionCaptureOptitrack(ip)
         self.obj_name = "cf2"
+        self.start_time = time.time()
+
+    def timestamp(self):
+        return time.time() - self.start_time
 
     def wait_frame_parse_pose(self):
         self.mocap.waitForNextFrame()
         try:
             obj = self.mocap.rigidBodies[self.obj_name]
             yaw = quat_2_yaw([obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w])
-            return array.array("f", [yaw] + list(obj.position))
+            return array.array("f", [self.timestamp()] + [yaw] + list(obj.position))
         except KeyError:  # not in frame
             return None
 
@@ -56,7 +60,7 @@ class RadioStreamer:
 
 
 print("Starting TX")
-streamer = RadioStreamer(devid=1)
+streamer = RadioStreamer(devid=0)
 try:
     while True:
         streamer.send_pose()

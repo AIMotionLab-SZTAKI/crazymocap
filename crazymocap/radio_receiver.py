@@ -16,7 +16,7 @@ class RadioReciever:
         atexit.register(self.close)
 
     def receive(self):
-        buffer = array.array("f", [0.0, 0.0, 0.0, 0.0])
+        buffer = array.array("f", [0.0, 0.0, 0.0, 0.0, 0.0])
         rec = self.radio.receive(buffer)
         if rec == buffer.itemsize * len(buffer):
             # self.radio.sendAck(buffer)
@@ -29,7 +29,7 @@ class RadioReciever:
 
 
 print("Starting RX")
-receiver = RadioReciever(devid=0)
+receiver = RadioReciever(devid=1)
 try:
     while True:
         rec = receiver.receive()
