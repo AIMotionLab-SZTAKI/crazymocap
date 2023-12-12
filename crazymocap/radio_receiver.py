@@ -27,17 +27,17 @@ class RadioReciever:
     def close(self):
         self.radio.close()
 
+if __name__=="__main__":
+    print("Starting RX")
+    receiver = RadioReciever(devid=0)
+    try:
+        while True:
+            rec = receiver.receive()
+            if rec is not None:
+                print(f"received {rec}")
 
-print("Starting RX")
-receiver = RadioReciever(devid=1)
-try:
-    while True:
-        rec = receiver.receive()
-        if rec is not None:
-            print(f"received {rec}")
-
-except Exception as exc:
-    print(f"Exception: {exc!r}. TRACEBACK:\n")
-    print(traceback.format_exc())
-    receiver.radio.close()
-input("Press Enter to exit...")
+    except Exception as exc:
+        print(f"Exception: {exc!r}. TRACEBACK:\n")
+        print(traceback.format_exc())
+        receiver.radio.close()
+    input("Press Enter to exit...")

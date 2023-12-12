@@ -58,15 +58,15 @@ class RadioStreamer:
     def close(self):
         self.radio.close()
 
+if __name__=="__main__":
+    print("Starting TX")
+    streamer = RadioStreamer(devid=0)
+    try:
+        while True:
+            streamer.send_pose()
+    except Exception as exc:
+        print(f"Exception: {exc!r}. TRACEBACK:\n")
+        print(traceback.format_exc())
+        streamer.close()
 
-print("Starting TX")
-streamer = RadioStreamer(devid=0)
-try:
-    while True:
-        streamer.send_pose()
-except Exception as exc:
-    print(f"Exception: {exc!r}. TRACEBACK:\n")
-    print(traceback.format_exc())
-    streamer.close()
-
-input("Press Enter to exit...")
+    input("Press Enter to exit...")
