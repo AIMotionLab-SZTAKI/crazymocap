@@ -60,7 +60,7 @@ class RadioStreamer:
 
 if __name__=="__main__":
     print("Starting TX")
-    streamer = RadioStreamer(devid=0)
+    streamer = RadioStreamer(devid=1)
     try:
         while True:
             streamer.send_pose()
