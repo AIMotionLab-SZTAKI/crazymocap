@@ -334,7 +334,7 @@ class Crazyradio:
         try:
             return self.handle.read(0x81, size_or_buffer=size_or_buffer, timeout=timeout)
         except usb.USBError:
-            pass
+            return None
 
 # Private utility functions
 def _send_vendor_setup(handle, request, value, index, data):

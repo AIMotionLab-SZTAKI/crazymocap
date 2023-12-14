@@ -9,7 +9,6 @@ if platform.system() == "Windows":
 elif platform.system() == "Linux":
     tx = subprocess.Popen(["x-terminal-emulator", "-e", "python3", "crazymocap/radio_streamer.py"])
 
-# time.sleep(2)
 
 print(f"Starting rx...")
 if platform.system() == "Windows":
