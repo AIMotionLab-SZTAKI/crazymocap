@@ -29,14 +29,14 @@ def quat_2_yaw(quat: List[float]):
 
 class RadioStreamer:
 
-    def __init__(self, devid, ip=args['ip'], mode=Crazyradio.MODE_PTX, channel=100, data_rate=Crazyradio.DR_250KPS):
+    def __init__(self, devid, ip=args['ip'], mode=Crazyradio.MODE_PTX, channel=100, data_rate=Crazyradio.DR_250KPS, object_name = args["object_name"]):
         self.radio = Crazyradio(devid=devid)
         self.radio.set_channel(channel)
         self.radio.set_data_rate(data_rate)
         self.radio.set_mode(mode)
         atexit.register(self.close)
         self.mocap = motioncapture.MotionCaptureOptitrack(ip)
-        self.obj_name = args['object_name']
+        self.obj_name = object_name
         self.start_time = time.time()
 
     def timestamp(self):
