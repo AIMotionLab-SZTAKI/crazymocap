@@ -1,5 +1,5 @@
 import array
-from crazyradio import Crazyradio
+from crazymocap.crazyradio import Crazyradio
 import traceback
 import time
 import atexit
