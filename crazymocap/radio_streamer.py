@@ -54,8 +54,10 @@ class RadioStreamer:
     def _send(self, data):
         res = self.radio.send_packet(data)
         #TODO: check if we got response?
+        """
         if res is not None and res.ack:
             print(f"sent data {data}, got response")
+        """
         return res
 
     def send_pose(self):
