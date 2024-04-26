@@ -2,12 +2,17 @@ from crazymocap.crazyradio import Crazyradio
 import traceback
 import atexit
 import motioncapture
-import time
 import array
 from typing import List
 import numpy as np
 import argparse
+import platform
 
+# win cant even get time right
+if platform.system() == 'Windows':
+    import win_precise_time as time
+else:
+    import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--ip",  default= "192.168.2.141")

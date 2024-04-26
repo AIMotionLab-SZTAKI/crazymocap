@@ -8,6 +8,7 @@ setup(name='crazymocap',
             'motioncapture',
             'numpy',
             'usb',
-            'libusb_package'
+            'libusb_package',
+            'win-precise-time==1.4.2 ; platform_system=="Windows"',
         ]
       )
