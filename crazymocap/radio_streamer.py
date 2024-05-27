@@ -7,6 +7,7 @@ from typing import List
 import numpy as np
 import argparse
 import platform
+import concurrent.futures
 
 # win cant even get time right
 if platform.system() == 'Windows':
@@ -15,9 +16,9 @@ else:
     import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--ip",  default= "192.168.2.141")
-parser.add_argument("-o", "--object_name",  default= "JoeBush1")
-parser.add_argument("-d", "--devid", default = 0)
+parser.add_argument("-i", "--ip", default="192.168.2.141")
+parser.add_argument("-o", "--object_name", default="JoeBush1")
+parser.add_argument("-d", "--devid", default=0)
 args = vars(parser.parse_args())
 
 
@@ -26,15 +27,26 @@ def quat_2_yaw(quat: List[float]):
     y = quat[1]
     z = quat[2]
     w = quat[3]
-    siny_cosp = 2*(w*z + x*y)
-    cosy_cosp = 1-2*(y*y + z*z)
+    siny_cosp = 2 * (w * z + x * y)
+    cosy_cosp = 1 - 2 * (y * y + z * z)
     yaw = np.arctan2(siny_cosp, cosy_cosp)
     return yaw
 
 
+def call_with_timeout(func, timeout=5):
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(func)
+        try:
+            future.result(timeout=timeout)
+            return True
+        except concurrent.futures.TimeoutError:
+            return False
+
+
 class RadioStreamer:
 
-    def __init__(self, devid, ip=args['ip'], mode=Crazyradio.MODE_PTX, channel=100, data_rate=Crazyradio.DR_250KPS, object_name = args["object_name"]):
+    def __init__(self, devid, ip=args['ip'], mode=Crazyradio.MODE_PTX, channel=100, data_rate=Crazyradio.DR_250KPS,
+                 object_name=args["object_name"]):
         self.radio = Crazyradio(devid=devid)
         self.radio.set_channel(channel)
         self.radio.set_data_rate(data_rate)
@@ -42,7 +54,17 @@ class RadioStreamer:
         atexit.register(self.close)
         self.mocap = motioncapture.MotionCaptureOptitrack(ip)
         self.obj_name = object_name
+        self.check_mocap()
+        print(f"MoCap radio streamer initialized for object {self.obj_name}!")
         self.start_time = time.time()
+
+    def check_mocap(self):
+        if not call_with_timeout(self.mocap.waitForNextFrame):
+            raise Exception("Connection cannot be established with the MoCap server!")
+        try:
+            obj = self.mocap.rigidBodies[self.obj_name]
+        except KeyError:
+            raise Exception(f"The pose data of {self.obj_name} is not streamed by the MoCap server!")
 
     def timestamp(self):
         return time.time() - self.start_time
@@ -58,7 +80,7 @@ class RadioStreamer:
 
     def _send(self, data):
         res = self.radio.send_packet(data)
-        #TODO: check if we got response?
+        # TODO: check if we got response?
         """
         if res is not None and res.ack:
             print(f"sent data {data}, got response")
@@ -73,7 +95,8 @@ class RadioStreamer:
     def close(self):
         self.radio.close()
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     print("Starting TX")
     streamer = RadioStreamer(devid=args["devid"])
     try:
