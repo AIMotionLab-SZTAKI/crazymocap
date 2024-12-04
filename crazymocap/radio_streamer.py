@@ -85,12 +85,13 @@ class RadioStreamer:
         if res is not None and res.ack:
             print(f"sent data {data}, got response")
         """
-        return res
+        return res.ack, res.data
 
     def send_pose(self):
         pose = self.wait_frame_parse_pose()
         if pose is not None:
-            self._send(pose)
+            res = self._send(pose)
+            # print(pose)
 
     def close(self):
         self.radio.close()
