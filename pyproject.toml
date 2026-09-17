@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crazymocap"
+version = "1.0.0"
+description = "Low-latency streaming of OptiTrack motion capture data over Crazyradio USB dongles."
+readme = "readme.md"
+# motioncapture 1.0a2 publishes wheels only up to CPython 3.11, see below.
+requires-python = ">=3.9,<3.12"
+dependencies = [
+    # Pinned: radio_streamer.py uses motioncapture.MotionCaptureOptitrack, which was
+    # removed in 1.0a4 in favour of motioncapture.connect().
+    "motioncapture==1.0a2",
+    "numpy",
+    "pyusb",  # provides the `usb` module imported by crazyradio.py
+    "libusb-package",  # bundles the libusb1 backend used on Linux
+    "win-precise-time>=1.4.2; sys_platform == 'win32'",
+]
+
+[tool.setuptools]
+packages = ["crazymocap"]
