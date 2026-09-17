@@ -25,6 +25,7 @@
 """
 USB driver for the Crazyradio USB dongle.
 """
+import errno
 import logging
 import os
 import platform
@@ -90,6 +91,22 @@ def _find_devices(serial=None):
 
 def get_serials():
     return tuple(map(lambda d: d.serial_number, _find_devices()))
+
+
+def open_first_free(start_devid=0):
+    """Open the first Crazyradio from start_devid onwards that isn't used by another process."""
+    n = len(_find_devices())
+    for devid in range(start_devid, n):
+        try:
+            radio = Crazyradio(devid=devid)
+        except usb.core.USBError as exc:
+            if exc.errno == errno.EBUSY:  # claimed by another process
+                continue
+            raise
+        # claim right away, so other processes see this dongle as busy even before our first packet
+        usb.util.claim_interface(radio.dev, 0)
+        return radio
+    raise Exception('No free Crazyradio found (devid {} onwards, {} connected)'.format(start_devid, n))
 
 
 class _radio_ack:

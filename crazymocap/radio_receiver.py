@@ -1,5 +1,5 @@
 import array
-from crazymocap.crazyradio import Crazyradio
+from crazymocap.crazyradio import Crazyradio, open_first_free
 import traceback
 import time
 import atexit
@@ -7,12 +7,12 @@ import atexit
 
 class RadioReciever:
     """Class to encapsulate the receiving crazyradio."""
-    def __init__(self, devid, mode=Crazyradio.MODE_PRX, channel=100, data_rate=Crazyradio.DR_250KPS):
-        # initialize radio
-        self.radio = Crazyradio(devid=devid) # if you only have 1 dongle in your PC, this must be 0
+    def __init__(self, devid=0, channel=100, data_rate=Crazyradio.DR_250KPS):
+        # initialize radio: the first dongle from devid onwards that no other process is using
+        self.radio = open_first_free(devid)
         self.radio.set_channel(channel)
         self.radio.set_data_rate(data_rate)
-        self.radio.set_mode(mode)
+        self.radio.set_mode(Crazyradio.MODE_PRX)
         # make sure radio gets released before the program quits
         atexit.register(self.close)
 

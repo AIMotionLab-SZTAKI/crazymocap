@@ -1,4 +1,4 @@
-from crazymocap.crazyradio import Crazyradio
+from crazymocap.crazyradio import Crazyradio, open_first_free
 import traceback
 import atexit
 import motioncapture
@@ -45,12 +45,12 @@ def call_with_timeout(func, timeout=5):
 
 class RadioStreamer:
 
-    def __init__(self, devid, ip=args['ip'], mode=Crazyradio.MODE_PTX, channel=100, data_rate=Crazyradio.DR_250KPS,
+    def __init__(self, devid=0, ip=args['ip'], channel=100, data_rate=Crazyradio.DR_250KPS,
                  object_name=args["object_name"]):
-        self.radio = Crazyradio(devid=devid)
+        self.radio = open_first_free(devid)
         self.radio.set_channel(channel)
         self.radio.set_data_rate(data_rate)
-        self.radio.set_mode(mode)
+        self.radio.set_mode(Crazyradio.MODE_PTX)
         atexit.register(self.close)
         self.mocap = motioncapture.MotionCaptureOptitrack(ip)
         self.obj_name = object_name
@@ -79,7 +79,8 @@ class RadioStreamer:
             return None
 
     def _send(self, data):
-        res = self.radio.send_packet(data)
+        # pyusb >= 1.3 only passes array('B') through as raw bytes, so serialize the float array first
+        res = self.radio.send_packet(data.tobytes())
         # TODO: check if we got response?
         """
         if res is not None and res.ack:
